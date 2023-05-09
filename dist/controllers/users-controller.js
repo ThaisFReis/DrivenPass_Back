@@ -7,6 +7,7 @@ exports.SignUp = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const users_service_1 = __importDefault(require("../services/users-service/index"));
 const schemas_1 = require("../schemas/index");
+const user_repository_1 = __importDefault(require("../repositories/user-repository/index"));
 // Sign up
 async function SignUp(req, res) {
     const { email, password } = req.body;
@@ -22,19 +23,19 @@ async function SignUp(req, res) {
             message: ' Email has to be a valid email and password has to be longer than 6 characters',
         });
     }
+    // Check if email is already in use
+    const user = await user_repository_1.default.findUserByEmail(email);
     try {
         const user = await users_service_1.default.createUser({ email, password });
-        return res.status(http_status_1.default.CREATED).json(user);
+        return res.status(http_status_1.default.CREATED).json({
+            user: {
+                id: user.id,
+                email: user.email,
+            },
+        });
     }
     catch (error) {
-        if (error === 'duplicatedEmailError') {
-            return res.status(http_status_1.default.CONFLICT).json({
-                message: 'Email already in use',
-            });
-        }
-        return res.status(http_status_1.default.INTERNAL_SERVER_ERROR).json({
-            message: 'Something went wrong',
-        });
+        return res.status(http_status_1.default.BAD_REQUEST).send(error);
     }
 }
 exports.SignUp = SignUp;
