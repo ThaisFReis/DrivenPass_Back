@@ -15,7 +15,7 @@ app
   .use(express.json())
   .get('/health', (_req, res) => res.send('OK!'))
   .use('/', usersRouter)
-  .use('/', authRouter)
+  .use('/', authRouter);
 
 export function init(): Promise<Express> {
   connectDb();
